@@ -91,23 +91,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Smooth Scroll on Nav Click with proper top header offset
   navItems.forEach(item => {
-    const link = item.querySelector('.eng-nav-link');
-    if (link) {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = item.getAttribute('data-step');
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          const navOffset = 100;
-          const elementPosition = targetEl.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+    const scrollToStep = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetId = item.getAttribute('data-step');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        // Ensure engineering section is visible if single-section mode is active
+        const engSection = document.getElementById('engineering');
+        if (engSection && engSection.style.display === 'none') {
+          engSection.style.display = 'block';
         }
-      });
-    }
+
+        const navOffset = 90;
+        const elementPosition = targetEl.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+
+        // Set active states immediately
+        navItems.forEach(ni => ni.classList.remove('active'));
+        item.classList.add('active');
+        stepCards.forEach(sc => sc.classList.remove('active-step'));
+        targetEl.classList.add('active-step');
+      }
+    };
+
+    item.addEventListener('click', scrollToStep);
   });
 
   // Certificate Modal Handlers

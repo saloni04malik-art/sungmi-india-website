@@ -201,15 +201,19 @@ class ProductInspector360 {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     this.scene.add(ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight1.position.set(5, 8, 5);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.8);
+    dirLight1.position.set(6, 9, 8);
     dirLight1.castShadow = true;
     this.scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.6);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.1);
+    fillLight.position.set(-6, 4, 6);
+    this.scene.add(fillLight);
+
+    const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.5);
     dirLight2.position.set(-5, -2, -3);
     this.scene.add(dirLight2);
 
@@ -300,60 +304,96 @@ class ProductInspector360 {
   }
 
   buildDoorModel(wireframe) {
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.35, metalness: 0.8, wireframe });
-    const darkSteelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.6, wireframe });
-    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.95, wireframe });
+    const redFrameMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.42, metalness: 0.35, wireframe });
+    const redLeafMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35, metalness: 0.25, wireframe });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.15, metalness: 0.95, wireframe });
+    const darkHardwareMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.7, wireframe });
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.6, wireframe });
 
-    // Outer Door Frame
-    const frameGeo = new THREE.BoxGeometry(2.4, 3.8, 0.25);
-    const frame = new THREE.Mesh(frameGeo, darkSteelMat);
+    // 1. Heavy-duty Outer Door Frame (Red Marine Steel)
+    const frameGeo = new THREE.BoxGeometry(2.8, 4.0, 0.24);
+    const frame = new THREE.Mesh(frameGeo, redFrameMat);
     this.productGroup.add(frame);
 
-    // Inner Door Leaf
-    const leafGeo = new THREE.BoxGeometry(2.0, 3.4, 0.18);
-    const leaf = new THREE.Mesh(leafGeo, steelMat);
-    leaf.position.z = 0.04;
-    this.productGroup.add(leaf);
+    // Inner Inset Body
+    const innerDepthGeo = new THREE.BoxGeometry(2.48, 3.68, 0.26);
+    const innerBack = new THREE.Mesh(innerDepthGeo, redFrameMat);
+    innerBack.position.z = -0.02;
+    this.productGroup.add(innerBack);
 
-    // Circular Porthole Bezel
-    const ringGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.08, 32);
-    ringGeo.rotateX(Math.PI / 2);
-    const ring = new THREE.Mesh(ringGeo, chromeMat);
-    ring.position.set(0, 0.6, 0.16);
-    this.productGroup.add(ring);
+    // 2. Double Door Leaves (Left & Right Leaf)
+    const leafWidth = 1.18;
+    const leafHeight = 3.56;
+    const leafDepth = 0.15;
 
-    // Vision Glass
-    const glassGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.04, 32);
-    glassGeo.rotateX(Math.PI / 2);
-    const glass = new THREE.Mesh(glassGeo, glassMat);
-    glass.position.set(0, 0.6, 0.17);
-    this.productGroup.add(glass);
+    // Left Door Leaf
+    const leftLeafGeo = new THREE.BoxGeometry(leafWidth, leafHeight, leafDepth);
+    const leftLeaf = new THREE.Mesh(leftLeafGeo, redLeafMat);
+    leftLeaf.position.set(-0.61, 0, 0.05);
+    this.productGroup.add(leftLeaf);
 
-    // Heavy Marine Hinges (3 units)
-    [-1.2, 0, 1.2].forEach(y => {
-      const hingeGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.3, 16);
-      const hinge = new THREE.Mesh(hingeGeo, chromeMat);
-      hinge.position.set(-1.12, y, 0.1);
-      this.productGroup.add(hinge);
+    // Right Door Leaf
+    const rightLeafGeo = new THREE.BoxGeometry(leafWidth, leafHeight, leafDepth);
+    const rightLeaf = new THREE.Mesh(rightLeafGeo, redLeafMat);
+    rightLeaf.position.set(0.61, 0, 0.05);
+    this.productGroup.add(rightLeaf);
+
+    // Central Meeting Astragal / Gap Seam
+    const seamGeo = new THREE.BoxGeometry(0.04, leafHeight, 0.17);
+    const seam = new THREE.Mesh(seamGeo, darkHardwareMat);
+    seam.position.set(0, 0, 0.06);
+    this.productGroup.add(seam);
+
+    // 3. Rectangular Fire Vision Windows (Left & Right Leaf)
+    [-0.61, 0.61].forEach(x => {
+      // Window Frame Bezel
+      const winFrameGeo = new THREE.BoxGeometry(0.42, 0.88, 0.19);
+      const winFrame = new THREE.Mesh(winFrameGeo, redFrameMat);
+      winFrame.position.set(x, 0.85, 0.06);
+      this.productGroup.add(winFrame);
+
+      // Glass Pane
+      const glassGeo = new THREE.BoxGeometry(0.32, 0.76, 0.04);
+      const glass = new THREE.Mesh(glassGeo, glassMat);
+      glass.position.set(x, 0.85, 0.15);
+      this.productGroup.add(glass);
     });
 
-    // Lever Handle & Lock Plate
-    const plateGeo = new THREE.BoxGeometry(0.14, 0.5, 0.03);
-    const plate = new THREE.Mesh(plateGeo, chromeMat);
-    plate.position.set(0.75, -0.2, 0.14);
-    this.productGroup.add(plate);
+    // 4. Stainless Steel Panic Push Exit Bars (Horizontal on Left & Right)
+    [-0.61, 0.61].forEach(x => {
+      // Horizontal Push Bar
+      const barGeo = new THREE.BoxGeometry(0.92, 0.075, 0.07);
+      const bar = new THREE.Mesh(barGeo, chromeMat);
+      bar.position.set(x, -0.1, 0.18);
+      this.productGroup.add(bar);
 
-    const handleGeo = new THREE.BoxGeometry(0.25, 0.05, 0.05);
-    const handle = new THREE.Mesh(handleGeo, chromeMat);
-    handle.position.set(0.78, -0.15, 0.2);
-    this.productGroup.add(handle);
+      // Bar End Mounts
+      [-0.42, 0.42].forEach(dx => {
+        const mountGeo = new THREE.BoxGeometry(0.07, 0.14, 0.09);
+        const mount = new THREE.Mesh(mountGeo, darkHardwareMat);
+        mount.position.set(x + dx, -0.1, 0.14);
+        this.productGroup.add(mount);
+      });
+    });
 
-    // Hydraulic Door Closer at top
-    const closerGeo = new THREE.BoxGeometry(0.6, 0.12, 0.12);
-    const closer = new THREE.Mesh(closerGeo, darkSteelMat);
-    closer.position.set(0, 1.55, 0.18);
-    this.productGroup.add(closer);
+    // 5. Vertical Central Latch Rod Mechanism (Right Door)
+    const rodGeo = new THREE.CylinderGeometry(0.018, 0.018, leafHeight - 0.15, 16);
+    const rod = new THREE.Mesh(rodGeo, chromeMat);
+    rod.position.set(0.07, 0, 0.16);
+    this.productGroup.add(rod);
+
+    // 6. Heavy Marine Hinges (3 on Left, 3 on Right)
+    [-1.25, 0, 1.25].forEach(y => {
+      // Left Hinge
+      const lHinge = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 16), chromeMat);
+      lHinge.position.set(-1.22, y, 0.08);
+      this.productGroup.add(lHinge);
+
+      // Right Hinge
+      const rHinge = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 16), chromeMat);
+      rHinge.position.set(1.22, y, 0.08);
+      this.productGroup.add(rHinge);
+    });
   }
 
   buildWallPanelModel(wireframe) {

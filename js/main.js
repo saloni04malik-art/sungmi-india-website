@@ -115,8 +115,28 @@ function initMainInteractions() {
       showAllSections('#hero');
       history.pushState(null, '', '#hero');
     } else {
-      showSingleSection(targetId);
-      history.pushState(null, '', targetId);
+      // Check if target is a top-level section
+      const targetSection = document.querySelector(`section${targetId}`);
+      if (targetSection) {
+        showSingleSection(targetId);
+        history.pushState(null, '', targetId);
+      } else {
+        // Internal page element (e.g., #step-01-facility)
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          const parentSec = targetEl.closest('section');
+          if (parentSec && parentSec.style.display === 'none') {
+            showSingleSection(`#${parentSec.getAttribute('id')}`);
+          }
+          const navOffset = 90;
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }
     }
 
     // Close mobile menu if open
@@ -131,6 +151,10 @@ function initMainInteractions() {
     anchor.addEventListener('click', function(e) {
       const targetId = this.getAttribute('href');
       if (targetId) {
+        // Bypass top-level navigation handler for internal journey step links to let engineering.js handle smoothly
+        if (targetId.startsWith('#step-') || this.closest('.eng-progress-sidebar') || this.classList.contains('eng-nav-link')) {
+          return;
+        }
         e.preventDefault();
         navigateTo(targetId);
       }

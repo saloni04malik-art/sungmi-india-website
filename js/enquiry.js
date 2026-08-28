@@ -85,16 +85,21 @@ function initProjectEnquiryForm() {
 
   function selectCountry(c) {
     selectedCountry = c;
-    countryCodeInput.value = c.dial;
-    countryFlagEl.textContent = c.flag;
-    countryDialEl.textContent = c.dial;
-    phoneInput.placeholder = c.placeholder || 'Enter phone number';
-    validateField(phoneInput);
+    if (countryCodeInput) countryCodeInput.value = c.dial;
+    if (countryFlagEl) countryFlagEl.textContent = c.flag;
+    if (countryDialEl) countryDialEl.textContent = c.dial;
+    if (phoneInput) {
+      phoneInput.placeholder = 'Enter mobile number';
+      if (phoneInput.value.trim()) {
+        validateField(phoneInput);
+      }
+    }
   }
 
   function openCountryDropdown() {
+    if (!countryDropdown) return;
     countryDropdown.classList.add('open');
-    countryBtn.setAttribute('aria-expanded', 'true');
+    if (countryBtn) countryBtn.setAttribute('aria-expanded', 'true');
     if (countrySearch) {
       countrySearch.value = '';
       renderCountryList('');
@@ -103,14 +108,15 @@ function initProjectEnquiryForm() {
   }
 
   function closeCountryDropdown() {
+    if (!countryDropdown) return;
     countryDropdown.classList.remove('open');
-    countryBtn.setAttribute('aria-expanded', 'false');
+    if (countryBtn) countryBtn.setAttribute('aria-expanded', 'false');
   }
 
   if (countryBtn) {
     countryBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (countryDropdown.classList.contains('open')) {
+      if (countryDropdown && countryDropdown.classList.contains('open')) {
         closeCountryDropdown();
       } else {
         openCountryDropdown();
@@ -124,7 +130,7 @@ function initProjectEnquiryForm() {
     }
 
     document.addEventListener('click', (e) => {
-      if (!countryDropdown.contains(e.target) && !countryBtn.contains(e.target)) {
+      if (countryDropdown && countryBtn && !countryDropdown.contains(e.target) && !countryBtn.contains(e.target)) {
         closeCountryDropdown();
       }
     });
@@ -140,7 +146,6 @@ function initProjectEnquiryForm() {
     phone: document.getElementById('enquiry-phone'),
     projectType: document.getElementById('enquiry-project-type'),
     product: document.getElementById('enquiry-product'),
-    startDate: document.getElementById('enquiry-start-date'),
     message: document.getElementById('enquiry-message')
   };
 
