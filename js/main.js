@@ -59,17 +59,24 @@ function initMainInteractions() {
   const navLinks = document.querySelectorAll('.nav-menu .nav-link, .nav-menu .dropdown-link');
   const navMenuElement = document.querySelector('.nav-menu');
   const menuToggleBtn = document.querySelector('.menu-toggle');
+  const homeSectionIds = ['hero', 'solutions', 'accommodation-explorer'];
 
   function showAllSections(scrollToTarget = '#hero') {
     document.body.classList.remove('single-section-mode');
     sections.forEach(sec => {
-      sec.style.display = '';
+      const secId = sec.getAttribute('id');
+      if (homeSectionIds.includes(secId)) {
+        sec.style.display = 'block';
+      } else {
+        sec.style.display = 'none';
+      }
     });
     
     // Update active nav link
     navLinks.forEach(link => {
       link.classList.remove('active');
-      if (link.getAttribute('href') === scrollToTarget) {
+      const href = link.getAttribute('href');
+      if (href === scrollToTarget || (scrollToTarget === '#hero' && (href === '#hero' || href === 'index.html' || href === 'index.html#hero'))) {
         link.classList.add('active');
         const parentDropdown = link.closest('.nav-item-dropdown');
         if (parentDropdown) {
@@ -124,27 +131,38 @@ function initMainInteractions() {
     if (!targetId || targetId === '#' || targetId === '#hero') {
       showAllSections('#hero');
       history.pushState(null, '', '#hero');
+    } else if (homeSectionIds.includes(targetId.replace('#', ''))) {
+      showAllSections(targetId);
+      history.pushState(null, '', targetId);
     } else {
-      // Check if target is a top-level section
+      // Check if target is a top-level section (e.g., #products, #engineering, #projects, #careers, #contact, #enquiry)
       const targetSection = document.querySelector(`section${targetId}`);
       if (targetSection) {
         showSingleSection(targetId);
         history.pushState(null, '', targetId);
       } else {
-        // Internal page element (e.g., #step-01-facility)
+        // Internal page element (e.g., #projects-clients, #step-01-facility)
         const targetEl = document.querySelector(targetId);
         if (targetEl) {
           const parentSec = targetEl.closest('section');
-          if (parentSec && parentSec.style.display === 'none') {
-            showSingleSection(`#${parentSec.getAttribute('id')}`);
+          if (parentSec) {
+            const pId = parentSec.getAttribute('id');
+            if (homeSectionIds.includes(pId)) {
+              showAllSections(targetId);
+            } else {
+              showSingleSection(`#${pId}`);
+            }
           }
-          const navOffset = 90;
-          const elementPosition = targetEl.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+          setTimeout(() => {
+            const navOffset = 90;
+            const elementPosition = targetEl.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }, 50);
+          history.pushState(null, '', targetId);
         }
       }
     }
@@ -213,20 +231,52 @@ function initMainInteractions() {
   window.addEventListener('scroll', updateNavActive, { passive: true });
   updateNavActive();
 
-  // 6. Magnetic CTA Button micro-interaction
-  const buttons = document.querySelectorAll('.btn-hero-action, .btn-cta-primary, .btn-cta-secondary');
-  buttons.forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+  // 7. Integrated Superstructure Banner Carousel Controller
+  const superSlides = document.querySelectorAll('.superstructure-slide');
+  const prevBtn = document.getElementById('superstructure-prev');
+  const nextBtn = document.getElementById('superstructure-next');
+  
+  if (superSlides.length > 0 && prevBtn && nextBtn) {
+    let currentSlide = 0;
+    const totalSlides = superSlides.length;
+
+    function showSlide(index) {
+      currentSlide = (index + totalSlides) % totalSlides;
+      superSlides.forEach((slide, i) => {
+        if (i === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+    }
+
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSlide(currentSlide - 1);
     });
 
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = '';
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSlide(currentSlide + 1);
     });
-  });
+
+    // Auto-advance every 5.5s
+    let autoInterval = setInterval(() => {
+      showSlide(currentSlide + 1);
+    }, 5500);
+
+    const bannerCard = document.getElementById('superstructure-banner-card');
+    if (bannerCard) {
+      bannerCard.addEventListener('mouseenter', () => clearInterval(autoInterval));
+      bannerCard.addEventListener('mouseleave', () => {
+        clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+          showSlide(currentSlide + 1);
+        }, 5500);
+      });
+    }
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -234,3 +284,4 @@ if (document.readyState === 'loading') {
 } else {
   initMainInteractions();
 }
+
