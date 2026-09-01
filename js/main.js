@@ -56,7 +56,7 @@ function initMainInteractions() {
 
   // 4. Section Navigation & View Controller
   const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-menu .nav-link');
+  const navLinks = document.querySelectorAll('.nav-menu .nav-link, .nav-menu .dropdown-link');
   const navMenuElement = document.querySelector('.nav-menu');
   const menuToggleBtn = document.querySelector('.menu-toggle');
 
@@ -71,6 +71,11 @@ function initMainInteractions() {
       link.classList.remove('active');
       if (link.getAttribute('href') === scrollToTarget) {
         link.classList.add('active');
+        const parentDropdown = link.closest('.nav-item-dropdown');
+        if (parentDropdown) {
+          const parentBtn = parentDropdown.querySelector('.nav-link-dropdown');
+          if (parentBtn) parentBtn.classList.add('active');
+        }
       }
     });
 
@@ -102,6 +107,11 @@ function initMainInteractions() {
       link.classList.remove('active');
       if (link.getAttribute('href') === targetId) {
         link.classList.add('active');
+        const parentDropdown = link.closest('.nav-item-dropdown');
+        if (parentDropdown) {
+          const parentBtn = parentDropdown.querySelector('.nav-link-dropdown');
+          if (parentBtn) parentBtn.classList.add('active');
+        }
       }
     });
 

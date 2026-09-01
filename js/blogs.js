@@ -24,7 +24,7 @@ const BLOG_ARTICLES_DATA = [
     category: "MARINE SAFETY",
     title: "The Role of Fire-Resistant Doors in Marine Accommodation",
     summary: "In maritime safety engineering, fire-resistant doors act as vital thermal barriers designed to compartmentalize fire, prevent smoke migration, and preserve emergency evacuation corridors.",
-    image: "assets/prod_fire_door_1787763804837.jpg",
+    image: "assets/door.jpg",
     alt: "Marine certified fire-resistant door and safety containment system",
     readTime: "3 min read",
     paragraphs: [
@@ -54,7 +54,7 @@ const BLOG_ARTICLES_DATA = [
     category: "MODULAR SYSTEMS",
     title: "Modular Accommodation: Smarter Solutions for Marine Projects",
     summary: "Factory prefabrication of modular cabins and wet units streamlines shipyard schedules, reduces on-board hot work, and ensures consistent quality control under controlled industrial standards.",
-    image: "assets/prod_modular_cabin_1787764089173.jpg",
+    image: "assets/modular-cabins.png",
     alt: "Prefabricated marine modular cabin and plug-and-play assembly system",
     readTime: "3 min read",
     paragraphs: [
@@ -85,7 +85,7 @@ function initBlogsSection() {
     if (modalCategory) modalCategory.textContent = blogData.category;
     if (modalTitle) modalTitle.textContent = blogData.title;
     if (modalReadTime) modalReadTime.textContent = blogData.readTime;
-    
+
     if (modalImage) {
       modalImage.src = blogData.image;
       modalImage.alt = blogData.alt || blogData.title;

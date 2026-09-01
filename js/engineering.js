@@ -1,7 +1,7 @@
 /**
  * SUNGMI INDIA - ENGINEERING & MANUFACTURING JOURNEY CONTROLLER
- * Handles scroll-spy for the 5-step journey:
- * 01 Facility -> 02 Manufacturing -> 03 Testing -> 04 Type Approval -> 05 Certifications
+ * Handles scroll-spy for the 4-step journey:
+ * 01 Facility -> 02 Manufacturing -> 03 Type Approval -> 04 Certifications
  * Also handles interactive certificate modal inspector.
  */
 
@@ -122,81 +122,56 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', scrollToStep);
   });
 
-  // Certificate Modal Handlers
-  certCards.forEach(card => {
-    card.addEventListener('click', () => {
-      const certKey = card.getAttribute('data-cert');
-      const data = CERTIFICATES_DATA[certKey];
-      if (!data || !certModal || !certModalBody) return;
+  // Certificate Lightbox Modal Handlers
+  const certCardItems = document.querySelectorAll('.cert-card-item');
+  const certModalTitle = document.getElementById('cert-modal-title');
+  const certModalImg = document.getElementById('cert-modal-img');
+  const certModalCloseBtn = document.getElementById('btn-cert-modal-close-action');
 
-      certModalBody.innerHTML = `
-        <div style="border-bottom: 2px solid #002b49; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-size: 1.6rem; font-weight: 900; color: #002b49; font-family: var(--font-heading);">ABS</div>
-            <div style="font-size: 0.85rem; font-weight: 700; color: #475569; letter-spacing: 0.05em;">Confirmation of Product Type Approval</div>
-          </div>
-          <div style="background: #e0f2fe; color: #0369a1; padding: 0.35rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono);">
-            TYPE APPROVED
-          </div>
-        </div>
+  const openCertModal = (card) => {
+    if (!certModal) return;
+    const title = card.getAttribute('data-cert-title') || 'Type Approval Certificate';
+    const imgSrc = card.getAttribute('data-cert-img') || 'assets/cert_1.png';
 
-        <div style="margin-bottom: 1.25rem;">
-          <div style="font-size: 0.75rem; color: #64748b; font-family: var(--font-mono);">MANUFACTURER</div>
-          <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; font-family: var(--font-heading);">SUNGMI INDIA PRIVATE LIMITED</div>
-          <div style="font-size: 0.82rem; color: #334155;">Plot No. I-10, Verna Industrial Estate, Verna, Salcete, Goa – 403722, India</div>
-        </div>
+    if (certModalTitle) certModalTitle.textContent = title;
+    if (certModalImg) {
+      certModalImg.src = imgSrc;
+      certModalImg.alt = title;
+    }
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem;">
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
-            <div>
-              <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">PRODUCT TYPE</div>
-              <div style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">${data.type}</div>
-            </div>
-            <div>
-              <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">CERTIFICATE NUMBER</div>
-              <div style="font-weight: 700; color: #0369a1; font-family: var(--font-mono); font-size: 0.85rem;">${data.certNo}</div>
-            </div>
-            <div>
-              <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">ISSUE DATE</div>
-              <div style="font-weight: 600; color: #0f172a; font-size: 0.85rem;">${data.issueDate}</div>
-            </div>
-            <div>
-              <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">EXPIRY DATE</div>
-              <div style="font-weight: 600; color: #16a34a; font-size: 0.85rem;">${data.expiryDate} (Active)</div>
-            </div>
-          </div>
+    certModal.classList.add('open');
+    certModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
 
-          <div style="margin-bottom: 0.75rem;">
-            <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">RATINGS & CLASSIFICATION</div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">${data.classRatings}</div>
-          </div>
+  certCardItems.forEach(card => {
+    card.addEventListener('click', (e) => {
+      openCertModal(card);
+    });
 
-          <div>
-            <div style="font-size: 0.7rem; color: #64748b; font-family: var(--font-mono);">DESCRIPTION & INTENDED SERVICE</div>
-            <div style="font-size: 0.82rem; color: #334155; line-height: 1.5;">${data.desc}</div>
-          </div>
-        </div>
-
-        <div style="font-size: 0.75rem; color: #64748b; line-height: 1.4; border-top: 1px dashed #cbd5e1; padding-top: 0.75rem;">
-          <strong>ABS Standards Compliance:</strong> ${data.rules}
-        </div>
-      `;
-
-      certModal.classList.add('open');
-      document.body.style.overflow = 'hidden';
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openCertModal(card);
+      }
     });
   });
 
   const closeCertModal = () => {
     if (certModal) {
       certModal.classList.remove('open');
+      certModal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
     }
   };
 
   if (certModalClose) certModalClose.addEventListener('click', closeCertModal);
+  if (certModalCloseBtn) certModalCloseBtn.addEventListener('click', closeCertModal);
   if (certModalBackdrop) certModalBackdrop.addEventListener('click', closeCertModal);
+
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeCertModal();
+    if (e.key === 'Escape' && certModal && certModal.classList.contains('open')) {
+      closeCertModal();
+    }
   });
 });
