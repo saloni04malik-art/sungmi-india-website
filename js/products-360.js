@@ -5,6 +5,68 @@
  * and dynamic technical specs drawer.
  */
 
+const PRODUCTS_DATA_360 = {
+  door: {
+    tag: '01 — MARINE PRODUCT INSPECTION',
+    title: '01 — FIRE RESISTANT DOORS',
+    specs: [
+      { label: 'FIRE RATING', value: 'A-0, A-60, B-15, H-120 Class' },
+      { label: 'WATER / WEATHER TIGHT', value: 'A-60 Marine Grade Gasket' },
+      { label: 'CORE MATERIAL', value: 'High-density Ceramic / Mineral Wool' },
+      { label: 'HARDWARE', value: 'Marine Grade 316 Stainless Steel' },
+      { label: 'SOUND REDUCTION', value: 'Up to 44 dB Acoustic Damping' },
+      { label: 'APPROVALS', value: 'ABS, MED, SOLAS / IMO Compliant' }
+    ]
+  },
+  wall: {
+    tag: '02 — MARINE PRODUCT INSPECTION',
+    title: '02 — WALL PANELS',
+    specs: [
+      { label: 'FIRE CLASSIFICATION', value: 'B-0 & B-15 Class' },
+      { label: 'THICKNESS OPTIONS', value: '25mm & 50mm Standard' },
+      { label: 'JOINT PROFILES', value: 'Spline, Insert & C-Clip Systems' },
+      { label: 'CORE COMPOSITION', value: 'Acoustic Rockwool Insulation' },
+      { label: 'SURFACE FINISH', value: 'PVC Laminated / Galvanized Steel' },
+      { label: 'APPLICATIONS', value: 'Accommodations, Passageways, Mess' }
+    ]
+  },
+  ceiling: {
+    tag: '03 — MARINE PRODUCT INSPECTION',
+    title: '03 — CEILING PANELS',
+    specs: [
+      { label: 'FIRE RATING', value: 'B-0 (25/40mm) & B-15 (50/75mm)' },
+      { label: 'CONSTRUCTION', value: 'Lightweight Composite / Micro-perforated' },
+      { label: 'SUSPENSION', value: 'Integrated T-Carrier Grid & Spring Hangers' },
+      { label: 'SERVICES INTEGRATION', value: 'Lighting, HVAC Diffusers, Sprinklers' },
+      { label: 'SURFACE COATING', value: 'Polyester Powder Coated Marine Alloy' },
+      { label: 'CERTIFICATION', value: 'Classification Society Type Approved' }
+    ]
+  },
+  wetunit: {
+    tag: '04 — MARINE PRODUCT INSPECTION',
+    title: '04 — MARINE WET UNITS',
+    specs: [
+      { label: 'MODULE TYPE', value: 'Fully Pre-fitted Bathroom Pod' },
+      { label: 'CONFIGURATIONS', value: 'Shower + WC / WC-Only Variant' },
+      { label: 'ASSEMBLY', value: 'Land-assembled Turnkey Unit' },
+      { label: 'PLUMBING & FIXTURES', value: 'Corrosion-Resistant Stainless / Chrome' },
+      { label: 'BASE TRAY', value: 'Integrated Waterproof Composite Tray' },
+      { label: 'CUSTOMIZATION', value: 'Tailored per Shipowner Requirements' }
+    ]
+  },
+  cabin: {
+    tag: '05 — MARINE PRODUCT INSPECTION',
+    title: '05 — MODULAR CABINS',
+    specs: [
+      { label: 'STRUCTURE', value: 'Turnkey Living Quarters Module' },
+      { label: 'APPLICATIONS', value: 'Naval, Commercial & Civil Marine' },
+      { label: 'FIT-OUT SCOPE', value: 'Panels, Ceiling, WC Pod, Furniture' },
+      { label: 'EFFICIENCY GAIN', value: 'Reduces Shipyard Fit-out by ~40-60%' },
+      { label: 'INSULATION', value: 'High Thermal & Sound Damping' },
+      { label: 'VESSEL TYPES', value: 'Naval, Tankers, Rigs, Offshore Platforms' }
+    ]
+  }
+};
 
 class ProductInspector360 {
   constructor() {
@@ -30,8 +92,6 @@ class ProductInspector360 {
     this.compassNeedle = document.getElementById('viewer-compass-needle');
     
     this.currentProductId = 'door';
-    this.currentProductCard = null;
-    this.dynamicCache = new Map();
     this.isAutoRotating = true;
     this.isWireframe = false;
     this.zoomLevel = 1.0;
@@ -53,8 +113,7 @@ class ProductInspector360 {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const prodId = btn.getAttribute('data-open-360');
-        const card = btn.closest('.product-card');
-        this.open(prodId, card);
+        this.open(prodId);
       });
     });
 
@@ -172,72 +231,22 @@ class ProductInspector360 {
     this.scene.add(this.productGroup);
   }
 
-  open(productId, cardElement = null) {
+  open(productId) {
     this.currentProductId = productId;
-    this.currentProductCard = cardElement ||
-      document.querySelector(`[data-open-360="${productId}"]`)?.closest('.product-card') ||
-      document.querySelector(`[data-product-id="${productId}"]`);
-
-    const card = this.currentProductCard;
-    const cardNum = card?.querySelector('.card-num')?.textContent?.trim() || '';
-    const rawTitle = card?.querySelector('.card-title')?.textContent?.trim() || '';
-    const rawTag = card?.querySelector('.card-tag')?.textContent?.trim() || '';
-
-    // Extract technical specs directly from the clicked product card
-    const cardSpecs = [];
-    if (card) {
-      card.querySelectorAll('.card-specs-list li').forEach((li) => {
-        const text = li.querySelector('span')?.textContent?.trim() || li.textContent?.trim();
-        if (text) {
-          cardSpecs.push({
-            label: '',
-            value: text
-          });
-        }
-      });
-    }
-
-    // Category default reference data (fallback)
-    const defaultData = (typeof PRODUCTS_DATA_360 !== 'undefined' ? PRODUCTS_DATA_360[productId] : null) ||
-                        (typeof window !== 'undefined' && window.PRODUCTS_DATA_360 ? window.PRODUCTS_DATA_360[productId] : null);
-
-    // Product Title has full freedom - use the actual typed product name
-    const finalTitle = rawTitle 
-      ? (cardNum ? `${cardNum} — ${rawTitle}` : rawTitle)
-      : (defaultData?.title || 'TECHNICAL PRODUCT INSPECTOR');
-
-    const finalTag = cardNum 
-      ? `${cardNum} — MARINE PRODUCT INSPECTION` 
-      : (rawTag ? rawTag : (defaultData?.tag || 'MARINE PRODUCT INSPECTION'));
-
-    const finalSpecs = (cardSpecs.length > 0)
-      ? cardSpecs
-      : (defaultData?.specs || []);
-
-    const data = {
-      tag: finalTag,
-      title: finalTitle,
-      specs: finalSpecs
-    };
-
-    console.log(`%c[360 INSPECT] ${data.title} (${data.tag})`, 'color: #0284c7; font-weight: bold; font-size: 13px;');
-    console.table(data.specs);
+    const data = PRODUCTS_DATA_360[productId];
+    if (!data) return;
 
     // Update Header & Specs
-    if (this.modalTag) this.modalTag.textContent = data.tag || '';
-    if (this.modalTitle) this.modalTitle.textContent = data.title || '';
+    if (this.modalTag) this.modalTag.textContent = data.tag;
+    if (this.modalTitle) this.modalTitle.textContent = data.title;
 
     if (this.specsContent) {
-      if (data.specs && data.specs.length) {
-        this.specsContent.innerHTML = data.specs.map(s => `
-          <div class="drawer-spec-item">
-            ${s.label ? `<span class="drawer-spec-label">${s.label}</span>` : ''}
-            <span class="drawer-spec-value">${s.value}</span>
-          </div>
-        `).join('');
-      } else {
-        this.specsContent.innerHTML = '';
-      }
+      this.specsContent.innerHTML = data.specs.map(s => `
+        <div class="drawer-spec-item">
+          <span class="drawer-spec-label">${s.label}</span>
+          <span class="drawer-spec-value">${s.value}</span>
+        </div>
+      `).join('');
     }
 
     // Show modal
@@ -710,392 +719,8 @@ class ProductInspector360 {
         this.buildCabinModel(wireMat);
         break;
       default:
-        this.buildDynamicProductModel(productId, wireMat);
-        break;
+        this.buildDoorModel(wireMat);
     }
-  }
-
-  createDynamicShadowTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
-    const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 120);
-    grad.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
-    grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.35)');
-    grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.10)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(128, 128, 120, 0, Math.PI * 2);
-    ctx.fill();
-    const texture = new THREE.CanvasTexture(canvas);
-    return texture;
-  }
-
-  buildScanningPlaceholder(wireframe) {
-    const group = new THREE.Group();
-    group.name = 'dynamic-placeholder';
-    const wire = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1.2, 2),
-      new THREE.MeshStandardMaterial({
-        color: 0x0284c7,
-        roughness: 0.2,
-        metalness: 0.9,
-        wireframe: true
-      })
-    );
-    group.add(wire);
-    this.productGroup.add(group);
-  }
-
-  buildDynamicProductModel(productId, wireframe) {
-    const card = this.currentProductCard ||
-                 document.querySelector(`[data-product-id="${productId}"]`) ||
-                 document.querySelector(`[data-open-360="${productId}"]`)?.closest('.product-card');
-    const imgEl = card ? card.querySelector('.product-img') : null;
-    const imgSrc = imgEl ? (imgEl.currentSrc || imgEl.src) : 'assets/door.jpeg';
-
-    if (this.dynamicCache.has(imgSrc)) {
-      this.constructDynamic3DMesh(this.dynamicCache.get(imgSrc), wireframe);
-    } else {
-      this.buildScanningPlaceholder(wireframe);
-      this.processProductImage(imgSrc, (processedData) => {
-        if (this.currentProductId === productId && this.modal && this.modal.classList.contains('open')) {
-          while (this.productGroup.children.length > 0) {
-            const obj = this.productGroup.children[0];
-            this.disposeObject(obj);
-            this.productGroup.remove(obj);
-          }
-          this.constructDynamic3DMesh(processedData, this.isWireframe);
-        }
-      });
-    }
-  }
-
-  processProductImage(imgSrc, callback) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    img.onload = () => {
-      try {
-        const rawW = img.naturalWidth || img.width;
-        const rawH = img.naturalHeight || img.height;
-
-        const maxDim = 1024;
-        let scale = 1;
-        if (rawW > maxDim || rawH > maxDim) {
-          scale = maxDim / Math.max(rawW, rawH);
-        }
-        const workW = Math.max(128, Math.round(rawW * scale));
-        const workH = Math.max(128, Math.round(rawH * scale));
-
-        const workCanvas = document.createElement('canvas');
-        workCanvas.width = workW;
-        workCanvas.height = workH;
-        const workCtx = workCanvas.getContext('2d');
-        workCtx.drawImage(img, 0, 0, workW, workH);
-
-        const imgData = workCtx.getImageData(0, 0, workW, workH);
-        const pixels = imgData.data;
-
-        // 1. Check if the image has inherent alpha transparency (e.g. isolated product PNG)
-        let transparentPixelCount = 0;
-        const totalPixels = workW * workH;
-        for (let i = 0; i < totalPixels; i++) {
-          if (pixels[i * 4 + 3] < 240) {
-            transparentPixelCount++;
-          }
-        }
-        const hasTrueAlpha = transparentPixelCount > totalPixels * 0.05;
-
-        // 2. Compute Depth Map & Normal Map
-        const dW = 256;
-        const dH = Math.max(64, Math.round(256 * (workH / workW)));
-        const depthCanvas = document.createElement('canvas');
-        depthCanvas.width = dW;
-        depthCanvas.height = dH;
-        const depthCtx = depthCanvas.getContext('2d');
-        const depthImgData = depthCtx.createImageData(dW, dH);
-        const dPix = depthImgData.data;
-
-        const depthArray = new Float32Array(dW * dH);
-        const maskArray = new Float32Array(dW * dH);
-
-        for (let y = 0; y < dH; y++) {
-          const normY = (y / (dH - 1)) * 2 - 1;
-          const domeY = Math.sqrt(Math.max(0, 1 - normY * normY * 0.85));
-          const srcY = Math.floor((y / dH) * workH);
-
-          for (let x = 0; x < dW; x++) {
-            const normX = (x / (dW - 1)) * 2 - 1;
-            const domeX = Math.sqrt(Math.max(0, 1 - normX * normX * 0.85));
-            const srcX = Math.floor((x / dW) * workW);
-            const srcIdx = (srcY * workW + srcX) * 4;
-
-            const a = pixels[srcIdx + 3];
-            const isFg = hasTrueAlpha ? (a > 50 ? 1.0 : 0.0) : 1.0;
-            maskArray[y * dW + x] = isFg;
-
-            let depthVal = 0;
-            if (isFg > 0) {
-              const r = pixels[srcIdx];
-              const g = pixels[srcIdx + 1];
-              const b = pixels[srcIdx + 2];
-              const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-              // Macro organic volume + micro surface relief from image features
-              const macroDome = domeX * domeY;
-              const microRelief = (lum - 0.5) * 0.30;
-              depthVal = Math.max(0.05, Math.min(1.0, macroDome * 0.75 + microRelief + 0.15));
-            }
-
-            depthArray[y * dW + x] = depthVal;
-            const bVal = Math.round(depthVal * 255);
-            const idx = (y * dW + x) * 4;
-            dPix[idx] = bVal;
-            dPix[idx + 1] = bVal;
-            dPix[idx + 2] = bVal;
-            dPix[idx + 3] = isFg > 0 ? 255 : 0;
-          }
-        }
-        depthCtx.putImageData(depthImgData, 0, 0);
-
-        // 3. Dynamic Tangent-Space Normal Map (Sobel Gradients)
-        const normalCanvas = document.createElement('canvas');
-        normalCanvas.width = dW;
-        normalCanvas.height = dH;
-        const normalCtx = normalCanvas.getContext('2d');
-        const normalImgData = normalCtx.createImageData(dW, dH);
-        const nPix = normalImgData.data;
-
-        const normalStrength = 3.2;
-        for (let y = 0; y < dH; y++) {
-          for (let x = 0; x < dW; x++) {
-            const x0 = Math.max(0, x - 1);
-            const x1 = Math.min(dW - 1, x + 1);
-            const y0 = Math.max(0, y - 1);
-            const y1 = Math.min(dH - 1, y + 1);
-
-            const zL = depthArray[y * dW + x0];
-            const zR = depthArray[y * dW + x1];
-            const zT = depthArray[y0 * dW + x];
-            const zB = depthArray[y1 * dW + x];
-
-            const dX = (zL - zR) * normalStrength;
-            const dY = (zT - zB) * normalStrength;
-            const dZ = 1.0;
-
-            const len = Math.sqrt(dX * dX + dY * dY + dZ * dZ);
-            const nx = dX / len;
-            const ny = dY / len;
-            const nz = dZ / len;
-
-            const outIdx = (y * dW + x) * 4;
-            nPix[outIdx] = Math.round((nx * 0.5 + 0.5) * 255);
-            nPix[outIdx + 1] = Math.round((ny * 0.5 + 0.5) * 255);
-            nPix[outIdx + 2] = Math.round((nz * 0.5 + 0.5) * 255);
-            nPix[outIdx + 3] = 255;
-          }
-        }
-        normalCtx.putImageData(normalImgData, 0, 0);
-
-        // 4. Photorealistic Product Textures
-        const targetRes = 1024;
-        const prodCanvas = document.createElement('canvas');
-        prodCanvas.width = targetRes;
-        prodCanvas.height = Math.max(128, Math.round(targetRes * (workH / workW)));
-        const prodCtx = prodCanvas.getContext('2d');
-        prodCtx.drawImage(workCanvas, 0, 0, prodCanvas.width, prodCanvas.height);
-
-        // Rear Chassis Backplate Texture
-        const rearCanvas = document.createElement('canvas');
-        rearCanvas.width = targetRes;
-        rearCanvas.height = prodCanvas.height;
-        const rearCtx = rearCanvas.getContext('2d');
-
-        // Mirrored shaded chassis
-        rearCtx.save();
-        rearCtx.translate(rearCanvas.width, 0);
-        rearCtx.scale(-1, 1);
-        rearCtx.drawImage(prodCanvas, 0, 0);
-        rearCtx.restore();
-
-        // Overlay brushed marine alloy tint
-        rearCtx.globalCompositeOperation = 'source-atop';
-        rearCtx.fillStyle = 'rgba(15, 23, 42, 0.65)';
-        rearCtx.fillRect(0, 0, rearCanvas.width, rearCanvas.height);
-        rearCtx.globalCompositeOperation = 'source-over';
-
-        // 5. Proportional 3D Dimensions
-        const aspectRatio = workW / workH;
-        let targetH = 2.2;
-        let targetW = targetH * aspectRatio;
-
-        if (targetW > 2.6) {
-          const s = 2.6 / targetW;
-          targetW = 2.6;
-          targetH *= s;
-        }
-        if (targetH > 2.4) {
-          const s = 2.4 / targetH;
-          targetH = 2.4;
-          targetW *= s;
-        }
-
-        const targetD = Math.max(0.16, Math.min(0.35, 0.20 * Math.sqrt(targetW * targetH)));
-
-        const processedData = {
-          productCanvas: prodCanvas,
-          depthCanvas: depthCanvas,
-          normalCanvas: normalCanvas,
-          rearCanvas: rearCanvas,
-          depthArray: depthArray,
-          maskArray: maskArray,
-          depthW: dW,
-          depthH: dH,
-          hasTrueAlpha: hasTrueAlpha,
-          width: targetW,
-          height: targetH,
-          depth: targetD,
-          aspectRatio: aspectRatio
-        };
-
-        this.dynamicCache.set(imgSrc, processedData);
-        callback(processedData);
-
-      } catch (err) {
-        console.error('Error processing dynamic 3D product:', err);
-      }
-    };
-
-    img.onerror = () => {
-      console.warn('Could not load product image for 360 viewer:', imgSrc);
-    };
-
-    img.src = imgSrc;
-  }
-
-  constructDynamic3DMesh(data, wireframe) {
-    if (!this.productGroup) return;
-
-    // Clear previous
-    while (this.productGroup.children.length > 0) {
-      const obj = this.productGroup.children[0];
-      this.disposeObject(obj);
-      this.productGroup.remove(obj);
-    }
-
-    const dynamicUnit = new THREE.Group();
-    this.productGroup.add(dynamicUnit);
-
-    const W = data.width;
-    const H = data.height;
-    const D = data.depth;
-
-    const productTex = new THREE.CanvasTexture(data.productCanvas);
-    productTex.anisotropy = 8;
-    const normalTex = new THREE.CanvasTexture(data.normalCanvas);
-    normalTex.anisotropy = 8;
-    const rearTex = new THREE.CanvasTexture(data.rearCanvas);
-    rearTex.anisotropy = 8;
-
-    const gridSegments = 64;
-
-    // 1. FRONT VOLUMETRIC SCULPTED 3D SURFACE (+Z)
-    const frontGeom = new THREE.PlaneGeometry(W, H, gridSegments, gridSegments);
-    const frontPos = frontGeom.attributes.position;
-
-    for (let i = 0; i < frontPos.count; i++) {
-      const x = frontPos.getX(i);
-      const y = frontPos.getY(i);
-
-      const u = Math.max(0, Math.min(1, (x / W) + 0.5));
-      const v = Math.max(0, Math.min(1, (y / H) + 0.5));
-
-      const px = Math.max(0, Math.min(data.depthW - 1, Math.floor(u * (data.depthW - 1))));
-      const py = Math.max(0, Math.min(data.depthH - 1, Math.floor((1 - v) * (data.depthH - 1))));
-
-      const dVal = data.depthArray[py * data.depthW + px] || 0;
-      const maskVal = data.maskArray[py * data.depthW + px] || 0;
-
-      if (maskVal > 0.05) {
-        frontPos.setZ(i, dVal * D);
-      } else {
-        frontPos.setZ(i, 0);
-      }
-    }
-    frontPos.needsUpdate = true;
-    frontGeom.computeVertexNormals();
-
-    const frontMat = new THREE.MeshStandardMaterial({
-      map: productTex,
-      normalMap: normalTex,
-      normalScale: new THREE.Vector2(1.2, 1.2),
-      roughness: 0.32,
-      metalness: 0.22,
-      transparent: data.hasTrueAlpha,
-      alphaTest: data.hasTrueAlpha ? 0.05 : 0,
-      side: THREE.FrontSide,
-      wireframe: wireframe
-    });
-
-    const frontMesh = new THREE.Mesh(frontGeom, frontMat);
-    dynamicUnit.add(frontMesh);
-
-    // 2. REAR VOLUMETRIC SCULPTED 3D HULL (-Z)
-    const backGeom = new THREE.PlaneGeometry(W, H, gridSegments, gridSegments);
-    const backPos = backGeom.attributes.position;
-
-    for (let i = 0; i < backPos.count; i++) {
-      const x = backPos.getX(i);
-      const y = backPos.getY(i);
-
-      const u = Math.max(0, Math.min(1, (x / W) + 0.5));
-      const v = Math.max(0, Math.min(1, (y / H) + 0.5));
-
-      const px = Math.max(0, Math.min(data.depthW - 1, Math.floor(u * (data.depthW - 1))));
-      const py = Math.max(0, Math.min(data.depthH - 1, Math.floor((1 - v) * (data.depthH - 1))));
-
-      const dVal = data.depthArray[py * data.depthW + px] || 0;
-      const maskVal = data.maskArray[py * data.depthW + px] || 0;
-
-      if (maskVal > 0.05) {
-        backPos.setZ(i, -dVal * (D * 0.70));
-      } else {
-        backPos.setZ(i, 0);
-      }
-    }
-    backPos.needsUpdate = true;
-    backGeom.computeVertexNormals();
-
-    const rearMat = new THREE.MeshStandardMaterial({
-      map: rearTex,
-      normalMap: normalTex,
-      normalScale: new THREE.Vector2(-0.8, -0.8),
-      roughness: 0.40,
-      metalness: 0.70,
-      transparent: data.hasTrueAlpha,
-      alphaTest: data.hasTrueAlpha ? 0.05 : 0,
-      side: THREE.BackSide,
-      wireframe: wireframe
-    });
-
-    const backMesh = new THREE.Mesh(backGeom, rearMat);
-    dynamicUnit.add(backMesh);
-
-    // 3. Ground Contact Shadow
-    const shadowTex = this.createDynamicShadowTexture();
-    const shadowMat = new THREE.MeshBasicMaterial({
-      map: shadowTex,
-      transparent: true,
-      opacity: 0.55,
-      depthWrite: false
-    });
-    const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(W * 1.35, Math.max(0.5, D * 5)), shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.set(0, -H / 2 - 0.04, 0);
-    dynamicUnit.add(shadowPlane);
   }
 
   buildDoorModel(wireframe) {

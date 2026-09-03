@@ -99,8 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
             targetCard.classList.remove('product-highlight-flash');
           }, 2400);
         }
-      } else {
-        window.location.href = 'products.php';
       }
     });
   });

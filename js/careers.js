@@ -6,13 +6,10 @@
 (function () {
   'use strict';
 
-  // Dynamic Roles Dataset with Fallback
-  const CAREER_ROLES_DATA = (typeof window !== 'undefined' && window.CAREER_ROLES_DATA && Object.keys(window.CAREER_ROLES_DATA).length > 0)
-    ? window.CAREER_ROLES_DATA
-    : {
+  // Static Roles Dataset (Easily extensible/replaceable with real openings)
+  const CAREER_ROLES_DATA = {
     'mechanical-production-engineer': {
-      id: '1',
-      slug: 'mechanical-production-engineer',
+      id: 'mechanical-production-engineer',
       title: 'Mechanical / Production Engineer',
       department: 'Engineering',
       location: 'Goa, India',
@@ -33,8 +30,7 @@
       ]
     },
     'quality-production-engineer': {
-      id: '2',
-      slug: 'quality-production-engineer',
+      id: 'quality-production-engineer',
       title: 'Quality / Production Engineer',
       department: 'Manufacturing',
       location: 'Goa, India',
@@ -55,8 +51,7 @@
       ]
     },
     'project-technical-coordinator': {
-      id: '3',
-      slug: 'project-technical-coordinator',
+      id: 'project-technical-coordinator',
       title: 'Project / Technical Coordinator',
       department: 'Projects',
       location: 'Goa, India',
@@ -79,18 +74,6 @@
   };
 
   let activeRoleId = null;
-  let selectedRoleTitle = '';
-  let selectedRoleId = null;
-
-  function getRoleById(roleId) {
-    if (!roleId) return null;
-    const dataset = (typeof window !== 'undefined' && window.CAREER_ROLES_DATA && Object.keys(window.CAREER_ROLES_DATA).length > 0)
-      ? window.CAREER_ROLES_DATA
-      : CAREER_ROLES_DATA;
-
-    if (dataset[roleId]) return dataset[roleId];
-    return Object.values(dataset).find(r => String(r.id) === String(roleId) || (r.slug && r.slug === String(roleId)));
-  }
 
   function initCareers() {
     setupRoleDetailsModal();
@@ -126,9 +109,9 @@
 
     if (applyFromRoleBtn) {
       applyFromRoleBtn.addEventListener('click', function () {
-        const role = getRoleById(activeRoleId);
+        const role = CAREER_ROLES_DATA[activeRoleId];
         closeRoleModal();
-        openApplyModal(role ? role.title : 'General Application', role ? role.id : 'general');
+        openApplyModal(role ? role.title : 'General Application', activeRoleId);
       });
     }
 
@@ -143,51 +126,27 @@
   }
 
   function openRoleModal(roleId) {
-    const role = getRoleById(roleId);
+    const role = CAREER_ROLES_DATA[roleId];
     if (!role) return;
 
-    activeRoleId = role.id;
+    activeRoleId = roleId;
 
-    const titleEl = document.getElementById('modal-role-title');
-    const deptEl = document.getElementById('modal-role-dept');
-    const locEl = document.getElementById('modal-role-location');
-    const typeEl = document.getElementById('modal-role-type');
-    const overviewEl = document.getElementById('modal-role-overview');
+    document.getElementById('modal-role-title').textContent = role.title;
+    document.getElementById('modal-role-dept').textContent = role.department;
+    document.getElementById('modal-role-location').textContent = role.location;
+    document.getElementById('modal-role-type').textContent = role.type;
+    document.getElementById('modal-role-overview').textContent = role.overview;
+
     const respList = document.getElementById('modal-role-responsibilities');
+    respList.innerHTML = role.responsibilities.map(item => `<li>${item}</li>`).join('');
+
     const reqList = document.getElementById('modal-role-requirements');
-
-    if (titleEl) titleEl.textContent = role.title;
-    if (deptEl) deptEl.textContent = role.department;
-    if (locEl) locEl.textContent = role.location;
-    if (typeEl) typeEl.textContent = role.type;
-    if (overviewEl) overviewEl.textContent = role.overview;
-
-    if (respList) {
-      if (Array.isArray(role.responsibilities) && role.responsibilities.length) {
-        respList.innerHTML = role.responsibilities.map(item => `<li>${item}</li>`).join('');
-      } else if (typeof role.responsibilities === 'string' && role.responsibilities.trim() !== '') {
-        respList.innerHTML = role.responsibilities.split('\n').filter(Boolean).map(item => `<li>${item.trim()}</li>`).join('');
-      } else {
-        respList.innerHTML = '<li>Details will be shared during the interview process.</li>';
-      }
-    }
-    if (reqList) {
-      const requirements = role.requirements || role.qualifications;
-      if (Array.isArray(requirements) && requirements.length) {
-        reqList.innerHTML = requirements.map(item => `<li>${item}</li>`).join('');
-      } else if (typeof requirements === 'string' && requirements.trim() !== '') {
-        reqList.innerHTML = requirements.split('\n').filter(Boolean).map(item => `<li>${item.trim()}</li>`).join('');
-      } else {
-        reqList.innerHTML = '<li>Relevant engineering qualification and experience.</li>';
-      }
-    }
+    reqList.innerHTML = role.requirements.map(item => `<li>${item}</li>`).join('');
 
     const roleModal = document.getElementById('career-role-modal');
-    if (roleModal) {
-      roleModal.classList.add('active');
-      roleModal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('modal-open');
-    }
+    roleModal.classList.add('active');
+    roleModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
   }
 
   function closeRoleModal() {
@@ -195,8 +154,7 @@
     if (!roleModal) return;
     roleModal.classList.remove('active');
     roleModal.setAttribute('aria-hidden', 'true');
-    const applyModal = document.getElementById('career-apply-modal');
-    if (!applyModal || !applyModal.classList.contains('active')) {
+    if (!document.getElementById('career-apply-modal')?.classList.contains('active')) {
       document.body.classList.remove('modal-open');
     }
   }
@@ -236,34 +194,15 @@
     const applyModal = document.getElementById('career-apply-modal');
     if (!applyModal) return;
 
-    const isSpecific = (roleId && roleId !== 'general');
-    const subtitleEl = document.getElementById('apply-modal-subtitle');
-    if (subtitleEl) {
-      subtitleEl.textContent = isSpecific
-        ? `Applying for: ${roleName}`
-        : 'Submit your details and CV below.';
-    }
-
-    selectedRoleTitle = isSpecific ? roleName : '';
-    selectedRoleId = isSpecific ? roleId : null;
-
+    document.getElementById('apply-modal-subtitle').textContent = `Applying for: ${roleName}`;
+    
+    // Select option or set hidden field
     const interestSelect = document.getElementById('apply-area-interest');
     if (interestSelect) {
-      if (isSpecific) {
-        const role = getRoleById(roleId);
-        if (role && role.department) {
-          let found = false;
-          for (let opt of interestSelect.options) {
-            if (opt.value.toLowerCase() === role.department.toLowerCase()) {
-              opt.selected = true;
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            const newOpt = new Option(role.department, role.department, true, true);
-            interestSelect.add(newOpt);
-          }
+      if (roleId && roleId !== 'general') {
+        const role = CAREER_ROLES_DATA[roleId];
+        if (role) {
+          interestSelect.value = role.department;
         }
       } else {
         interestSelect.value = 'General / Any';
@@ -274,7 +213,6 @@
     if (statusBox) {
       statusBox.style.display = 'none';
       statusBox.className = 'apply-status-msg';
-      statusBox.textContent = '';
     }
 
     applyModal.classList.add('active');
@@ -291,7 +229,7 @@
   }
 
   /* --------------------------------------------------------------------------
-     3. File Upload Simulation & Interaction
+     3. File Upload Simulation
      -------------------------------------------------------------------------- */
   function setupFileUpload() {
     const fileInput = document.getElementById('apply-cv-file');
@@ -300,19 +238,13 @@
 
     if (!fileInput || !dropZone) return;
 
-    dropZone.addEventListener('click', (e) => {
-      if (e.target !== fileInput) {
-        fileInput.click();
-      }
-    });
+    dropZone.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', function () {
       if (this.files && this.files[0]) {
         const file = this.files[0];
-        if (fileNameDisplay) {
-          fileNameDisplay.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-          fileNameDisplay.style.display = 'block';
-        }
+        fileNameDisplay.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileNameDisplay.style.display = 'block';
       }
     });
 
@@ -334,10 +266,8 @@
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         fileInput.files = e.dataTransfer.files;
         const file = e.dataTransfer.files[0];
-        if (fileNameDisplay) {
-          fileNameDisplay.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-          fileNameDisplay.style.display = 'block';
-        }
+        fileNameDisplay.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileNameDisplay.style.display = 'block';
       }
     });
   }
@@ -345,121 +275,39 @@
   /* --------------------------------------------------------------------------
      4. Form Submission Handler
      -------------------------------------------------------------------------- */
-  async function handleApplicationSubmit(e) {
+  function handleApplicationSubmit(e) {
     e.preventDefault();
-
     const form = e.target;
     const statusBox = document.getElementById('apply-form-status');
     const submitBtn = form.querySelector('button[type="submit"]');
 
-    /* Browser validation */
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
-    /* Check CV */
-    const fileInput = document.getElementById('apply-cv-file');
-    if (!fileInput || !fileInput.files || !fileInput.files.length) {
-      if (statusBox) {
-        statusBox.textContent = 'Please upload your CV.';
-        statusBox.className = 'apply-status-msg error';
-        statusBox.style.display = 'block';
-      }
-      return;
-    }
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>SUBMITTING...</span>';
 
-    /* Check CV size */
-    const file = fileInput.files[0];
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      if (statusBox) {
-        statusBox.textContent = 'CV file size must not exceed 10MB.';
-        statusBox.className = 'apply-status-msg error';
-        statusBox.style.display = 'block';
-      }
-      return;
-    }
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>SUBMIT APPLICATION</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
-    /* Disable submit button & loading state */
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>SUBMITTING...</span>';
-    }
+      statusBox.textContent = 'Thank you for your application. Our recruitment team will review your profile and contact you shortly.';
+      statusBox.className = 'apply-status-msg success';
+      statusBox.style.display = 'block';
 
-    /* Create FormData */
-    const formData = new FormData(form);
+      form.reset();
+      const fileNameDisplay = document.getElementById('apply-cv-filename');
+      if (fileNameDisplay) fileNameDisplay.style.display = 'none';
 
-    /* Send selected role title and job_role_id */
-    if (selectedRoleTitle && selectedRoleTitle !== '') {
-      formData.append('role_title', selectedRoleTitle);
-    }
-    if (selectedRoleId && selectedRoleId !== 'general') {
-      formData.append('job_role_id', selectedRoleId);
-    }
-
-    try {
-      const response = await fetch('career_submit.php', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        if (statusBox) {
-          statusBox.textContent = result.message || 'Your application has been submitted successfully.';
-          statusBox.className = 'apply-status-msg success';
-          statusBox.style.display = 'block';
-        }
-
-        form.reset();
-        selectedRoleTitle = '';
-        selectedRoleId = null;
-
-        const fileNameDisplay = document.getElementById('apply-cv-filename');
-        if (fileNameDisplay) {
-          fileNameDisplay.textContent = '';
-          fileNameDisplay.style.display = 'none';
-        }
-
-        setTimeout(() => {
-          closeApplyModal();
-        }, 3500);
-
-      } else {
-        if (statusBox) {
-          statusBox.textContent = result.message || 'Unable to submit application.';
-          statusBox.className = 'apply-status-msg error';
-          statusBox.style.display = 'block';
-        }
-      }
-
-    } catch (err) {
-      if (statusBox) {
-        statusBox.textContent = 'A network error occurred. Please check your connection and try again.';
-        statusBox.className = 'apply-status-msg error';
-        statusBox.style.display = 'block';
-      }
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `
-          <span>SUBMIT APPLICATION</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        `;
-      }
-    }
+      setTimeout(() => {
+        closeApplyModal();
+      }, 3500);
+    }, 1200);
   }
 
-  // Global exports
-  window.openCareerRoleModal = openRoleModal;
-  window.openCareerApplyModal = openApplyModal;
-  window.closeCareerRoleModal = closeRoleModal;
-  window.closeCareerApplyModal = closeApplyModal;
-
+  // Initialize once DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCareers);
   } else {

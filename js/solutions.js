@@ -66,71 +66,6 @@ class ApplicationsShowcase {
   init() {
     if (!this.selectorItems.length || !this.visualLayers.length) return;
 
-    // Helper to get target app from URL query or hash
-    const getAppFromUrl = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      let app = searchParams.get('app');
-      if (app && APPLICATIONS_DATA[app]) return app;
-
-      if (window.location.hash) {
-        const match = window.location.hash.match(/app=(0[1-6])/) || window.location.hash.match(/0[1-6]/);
-        if (match && APPLICATIONS_DATA[match[1] || match[0]]) {
-          return match[1] || match[0];
-        }
-      }
-      return null;
-    };
-
-    const activateFromUrl = (smoothScroll = false) => {
-      const targetApp = getAppFromUrl();
-      if (targetApp && APPLICATIONS_DATA[targetApp]) {
-        this.selectApplication(targetApp);
-        if (smoothScroll) {
-          const section = document.getElementById('solutions');
-          if (section) {
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }
-      }
-    };
-
-    // Run on initial page load
-    const initialTarget = getAppFromUrl();
-    if (initialTarget) {
-      this.selectApplication(initialTarget);
-      setTimeout(() => {
-        const section = document.getElementById('solutions');
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
-
-    // Listen for hash and popstate changes
-    window.addEventListener('hashchange', () => activateFromUrl(true));
-    window.addEventListener('popstate', () => activateFromUrl(true));
-
-    // Intercept clicks on links targeting specific applications
-    document.querySelectorAll('a[href*="app="]').forEach(link => {
-      link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href') || '';
-        const match = href.match(/app=(0[1-6])/);
-        if (match) {
-          const targetApp = match[1];
-          const section = document.getElementById('solutions');
-          // If solutions section exists on current page, handle smoothly without reload
-          if (section) {
-            e.preventDefault();
-            this.selectApplication(targetApp);
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            if (window.history && window.history.pushState) {
-              window.history.pushState(null, '', `index.php?app=${targetApp}#solutions`);
-            }
-          }
-        }
-      });
-    });
-
     this.selectorItems.forEach((item, index) => {
       const appId = item.getAttribute('data-app-id');
 
@@ -164,7 +99,7 @@ class ApplicationsShowcase {
   }
 
   selectApplication(appId) {
-    if (!APPLICATIONS_DATA[appId]) return;
+    if (this.currentAppId === appId || !APPLICATIONS_DATA[appId]) return;
 
     this.currentAppId = appId;
     const data = APPLICATIONS_DATA[appId];
