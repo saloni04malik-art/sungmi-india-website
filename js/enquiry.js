@@ -451,7 +451,7 @@ function initProjectEnquiryForm() {
     }
 
     try {
-      const response = await fetch('enquiry.php', {
+      const response = await fetch('enquiry_submit.php', {
         method: 'POST',
         body: formData
       });
