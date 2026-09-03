@@ -235,7 +235,7 @@
           </div>
         </div>
         <div class="footer-banner-right">
-          <a href="contact.php" class="btn-footer-start-project">
+          <a href="enquiry.php" class="btn-footer-start-project">
             <span>START A PROJECT</span>
           </a>
         </div>

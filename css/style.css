@@ -2123,12 +2123,12 @@ section[id] {
 
 /* Section Header - Cinematic Hero Banner */
 .eng-header-block {
-  margin-bottom: 3.5rem;
+  margin-bottom: 2.25rem;
   background: radial-gradient(circle at top right, rgba(132, 204, 22, 0.05) 0%, transparent 60%),
     rgba(14, 25, 44, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  padding: 3.5rem 3.5rem 3rem;
+  padding: 2rem 2.5rem;
   position: relative;
   overflow: hidden;
 }
@@ -2171,7 +2171,7 @@ section[id] {
   color: var(--color-text-muted);
   max-width: 950px;
   line-height: 1.65;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
 }
 
 /* 4-Stat Pills - Full Width 4-Column Grid */
@@ -4545,7 +4545,7 @@ section[id] {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 4.5rem;
+  gap: 2.75rem;
 }
 
 /* 1. HERO HEADER BLOCK */
@@ -4903,6 +4903,10 @@ section[id] {
     padding: 4.5rem 1.5rem 5rem;
   }
 
+  .contact-container {
+    gap: 2.25rem;
+  }
+
   .contact-hero-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -4917,8 +4921,8 @@ section[id] {
   }
 
   .contact-main-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
   }
 
   .contact-enquiry-strip {
@@ -4935,6 +4939,13 @@ section[id] {
   .btn-enquiry-cta {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 }
 
@@ -6546,6 +6557,29 @@ body.modal-open {
   color: #ffffff;
   transform: scale(0.95);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(132, 204, 22, 0.45) rgba(8, 16, 30, 0.6);
+  overscroll-behavior: contain;
+}
+
+.career-modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.career-modal-container::-webkit-scrollbar-track {
+  background: rgba(6, 12, 22, 0.6);
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.career-modal-container::-webkit-scrollbar-thumb {
+  background: rgba(132, 204, 22, 0.35);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.career-modal-container::-webkit-scrollbar-thumb:hover {
+  background: #84cc16;
 }
 
 .career-modal.active .career-modal-container {
@@ -8540,27 +8574,36 @@ body.modal-open {
 }
 
 .home-client-mini-card {
-  background: #ffffff;
+  background: rgba(14, 25, 44, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   height: 62px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.5rem 0.85rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
 }
 
 .home-client-mini-card:hover {
+  border-color: rgba(181, 207, 43, 0.45);
+  background: rgba(18, 32, 56, 0.95);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(181, 207, 43, 0.08);
 }
+
 
 .mini-client-logo {
   max-width: 100%;
   max-height: 38px;
   object-fit: contain;
   filter: contrast(1.05);
+}
+.home-client-mini-card img[src*="bright_marine"] {
+  filter: brightness(0) invert(0.96);
 }
 
 /* Card Bottom Buttons */
@@ -8671,7 +8714,14 @@ body.modal-open {
   line-height: 1.6;
   color: var(--text-muted, rgba(255, 255, 255, 0.75));
   margin: 0 0 1.65rem 0;
-  max-width: 320px;
+  max-width: 380px;
+}
+
+.home-career-btn-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .career-card-visual {

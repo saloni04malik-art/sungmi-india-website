@@ -756,12 +756,16 @@ include 'includes/headerScript.php';
             <div class="career-card-content">
               <h3 class="career-card-title">BUILD YOUR CAREER WITH SUNGMI</h3>
               <p class="career-card-desc">
-                Join our team and be part of building world-class marine and offshore solutions.
+                Join our team of engineers, technicians and specialists delivering precision marine accommodation systems. Explore rewarding career opportunities across engineering, manufacturing, QA/QC and offshore project execution.
               </p>
               <div class="home-career-btn-wrap">
                 <a href="careers.php" class="btn-dual-card-action" id="btn-home-explore-careers">
                   <span>EXPLORE CAREERS</span>
                 </a>
+                <a href="careers.php#careers-openings" class="btn-dual-card-action" id="btn-home-view-roles">
+                 <span>VIEW ROLES</span>
+                </a>
+
               </div>
             </div>
 
