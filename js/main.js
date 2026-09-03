@@ -24,7 +24,7 @@ function initMainInteractions() {
       navMenu.classList.toggle('open');
       const isOpen = navMenu.classList.contains('open');
       menuToggle.setAttribute('aria-expanded', isOpen);
-      menuToggle.innerHTML = isOpen 
+      menuToggle.innerHTML = isOpen
         ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
         : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
     });
@@ -40,11 +40,11 @@ function initMainInteractions() {
 
   // 3. Dynamic Real-time Telemetry updates (Subtle marine HUD effect)
   const coordsElement = document.getElementById('telemetry-coords');
-  
+
   if (coordsElement) {
     let lat = 15.3991; // Approx Goa Marine Hub coordinates (India facility)
     let lng = 73.8115;
-    
+
     setInterval(() => {
       const deltaLat = (Math.random() - 0.5) * 0.0004;
       const deltaLng = (Math.random() - 0.5) * 0.0004;
@@ -54,173 +54,94 @@ function initMainInteractions() {
     }, 2400);
   }
 
-  // 4. Section Navigation & View Controller
+  // 4. Navigation & Page Controller
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-menu .nav-link, .nav-menu .dropdown-link');
-  const navMenuElement = document.querySelector('.nav-menu');
-  const menuToggleBtn = document.querySelector('.menu-toggle');
-  const homeSectionIds = ['hero', 'solutions', 'accommodation-explorer'];
 
-  function showAllSections(scrollToTarget = '#hero') {
-    document.body.classList.remove('single-section-mode');
-    sections.forEach(sec => {
-      const secId = sec.getAttribute('id');
-      if (homeSectionIds.includes(secId)) {
-        sec.style.display = 'block';
-      } else {
-        sec.style.display = 'none';
-      }
-    });
-    
-    // Update active nav link
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      const href = link.getAttribute('href');
-      if (href === scrollToTarget || (scrollToTarget === '#hero' && (href === '#hero' || href === 'index.html' || href === 'index.html#hero'))) {
-        link.classList.add('active');
-        const parentDropdown = link.closest('.nav-item-dropdown');
-        if (parentDropdown) {
-          const parentBtn = parentDropdown.querySelector('.nav-link-dropdown');
-          if (parentBtn) parentBtn.classList.add('active');
-        }
-      }
+  // 2.5 Capabilities Dropdown Toggle
+  const capDropdown = document.querySelector('.nav-item-dropdown');
+  const capBtn = document.querySelector('.nav-link-dropdown') || document.getElementById('capabilitiesDropdownBtn');
+
+  if (capBtn && capDropdown) {
+    capBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      capDropdown.classList.toggle('open');
+      const isOpen = capDropdown.classList.contains('open');
+      capBtn.setAttribute('aria-expanded', isOpen);
     });
 
-    const targetEl = document.querySelector(scrollToTarget);
-    if (targetEl) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Close dropdown when clicking anywhere outside
+    document.addEventListener('click', (e) => {
+      if (!capDropdown.contains(e.target)) {
+        capDropdown.classList.remove('open');
+        capBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // 1. Detect current page name (e.g., "engineering.php", "careers.php", "index.php")
+  const currentPath = window.location.pathname.split('/').pop() || 'index.php';
+  const isHomePage = currentPath === 'index.php' || currentPath === '' || currentPath === 'index.html';
+
+  // 2. Set active nav link based on current page
+  document.querySelectorAll('.nav-menu .nav-link, .nav-menu .dropdown-link').forEach(link => {
+    link.classList.remove('active');
+    const href = link.getAttribute('href');
+
+    if (href === currentPath || (isHomePage && (href === 'index.php' || href === '#hero'))) {
+      link.classList.add('active');
+
+      const parentDropdown = link.closest('.nav-item-dropdown');
+      if (parentDropdown) {
+        const parentBtn = parentDropdown.querySelector('.nav-link-dropdown');
+        if (parentBtn) parentBtn.classList.add('active');
+      }
+    }
+  });
+
+  // 3. Handle page hash / SPA scroll only if on Home Page
+  if (isHomePage) {
+    const initialHash = window.location.hash;
+    if (initialHash && initialHash !== '#hero') {
+      const targetSec = document.querySelector(initialHash);
+      if (targetSec) {
+        setTimeout(() => targetSec.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
     }
   }
 
-  function showSingleSection(targetId) {
-    const targetSection = document.querySelector(targetId);
-    if (!targetSection) return;
-
-    document.body.classList.add('single-section-mode');
-
-    // Hide all sections except the chosen one
-    sections.forEach(sec => {
-      if (`#${sec.getAttribute('id')}` === targetId) {
-        sec.style.display = 'block';
-      } else {
-        sec.style.display = 'none';
-      }
-    });
-
-    // Update active nav link
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === targetId) {
-        link.classList.add('active');
-        const parentDropdown = link.closest('.nav-item-dropdown');
-        if (parentDropdown) {
-          const parentBtn = parentDropdown.querySelector('.nav-link-dropdown');
-          if (parentBtn) parentBtn.classList.add('active');
-        }
-      }
-    });
-
-    // Scroll to top of that section
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function navigateTo(targetId) {
-    if (!targetId || targetId === '#' || targetId === '#hero') {
-      showAllSections('#hero');
-      history.pushState(null, '', '#hero');
-    } else if (homeSectionIds.includes(targetId.replace('#', ''))) {
-      showAllSections(targetId);
-      history.pushState(null, '', targetId);
-    } else {
-      // Check if target is a top-level section (e.g., #products, #engineering, #projects, #careers, #contact, #enquiry)
-      const targetSection = document.querySelector(`section${targetId}`);
-      if (targetSection) {
-        showSingleSection(targetId);
-        history.pushState(null, '', targetId);
-      } else {
-        // Internal page element (e.g., #projects-clients, #step-01-facility)
+  // 4. In-page anchor link scrolling
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const targetId = this.getAttribute('href');
+      if (targetId && targetId !== '#' && targetId !== '#hero') {
         const targetEl = document.querySelector(targetId);
         if (targetEl) {
-          const parentSec = targetEl.closest('section');
-          if (parentSec) {
-            const pId = parentSec.getAttribute('id');
-            if (homeSectionIds.includes(pId)) {
-              showAllSections(targetId);
-            } else {
-              showSingleSection(`#${pId}`);
-            }
-          }
-          setTimeout(() => {
-            const navOffset = 90;
-            const elementPosition = targetEl.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: 'smooth'
-            });
-          }, 50);
-          history.pushState(null, '', targetId);
+          e.preventDefault();
+          const navOffset = 90;
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
         }
-      }
-    }
-
-    // Close mobile menu if open
-    if (navMenuElement && navMenuElement.classList.contains('open')) {
-      navMenuElement.classList.remove('open');
-      if (menuToggleBtn) menuToggleBtn.setAttribute('aria-expanded', 'false');
-    }
-  }
-
-  // Handle all anchor link clicks
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      const targetId = this.getAttribute('href');
-      if (targetId) {
-        // Bypass top-level navigation handler for internal journey step links to let engineering.js handle smoothly
-        if (targetId.startsWith('#step-') || this.closest('.eng-progress-sidebar') || this.classList.contains('eng-nav-link')) {
-          return;
-        }
-        e.preventDefault();
-        navigateTo(targetId);
       }
     });
   });
 
-  // Handle browser back/forward buttons
-  window.addEventListener('popstate', () => {
-    const hash = window.location.hash || '#hero';
-    if (hash === '#hero' || hash === '') {
-      showAllSections('#hero');
-    } else {
-      showSingleSection(hash);
-    }
-  });
-
-  // Initialize on page load based on current hash
-  const initialHash = window.location.hash;
-  if (initialHash && initialHash !== '#hero') {
-    showSingleSection(initialHash);
-  } else {
-    showAllSections('#hero');
-  }
-
-  // 5. Header Navigation Active ScrollSpy (active only when on full Home page)
+  // 5. Header Navigation Active ScrollSpy (active ONLY on full Home page)
   const updateNavActive = () => {
-    if (document.body.classList.contains('single-section-mode')) return;
+    if (!isHomePage) return;
     const scrollY = window.scrollY + 120;
     sections.forEach(section => {
       const sectionHeight = section.offsetHeight;
       const sectionTop = section.offsetTop;
       const sectionId = section.getAttribute('id');
-      
+
       if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
         navLinks.forEach(link => {
           link.classList.remove('active');
           const href = link.getAttribute('href');
-          if (href === `#${sectionId}`) {
+          if (href === `#${sectionId}` || (sectionId === 'hero' && href === 'index.php')) {
             link.classList.add('active');
           }
         });
@@ -228,27 +149,58 @@ function initMainInteractions() {
     });
   };
 
-  window.addEventListener('scroll', updateNavActive, { passive: true });
-  updateNavActive();
+  if (isHomePage) {
+    window.addEventListener('scroll', updateNavActive, { passive: true });
+  }
 
   // 7. Integrated Superstructure Banner Carousel Controller
   const superSlides = document.querySelectorAll('.superstructure-slide');
   const prevBtn = document.getElementById('superstructure-prev');
   const nextBtn = document.getElementById('superstructure-next');
-  
+
+  // Preload all banner images immediately so they never lag or load weirdly
+  [
+    'assets/door.jpeg',
+    'assets/wall.jpeg',
+    'assets/ceiling.jpeg',
+    'assets/wet-units.jpg',
+    'assets/modular-cabins.jpg'
+  ].forEach(src => {
+    const preImg = new Image();
+    preImg.src = src;
+  });
+
   if (superSlides.length > 0 && prevBtn && nextBtn) {
     let currentSlide = 0;
+    let prevSlide = -1;
     const totalSlides = superSlides.length;
 
     function showSlide(index) {
-      currentSlide = (index + totalSlides) % totalSlides;
+      if (superSlides.length === 0) return;
+      const targetIndex = (index + totalSlides) % totalSlides;
+      if (targetIndex === currentSlide) return;
+
+      prevSlide = currentSlide;
+      currentSlide = targetIndex;
+
+      // Keep previous slide underneath so background NEVER flashes black
       superSlides.forEach((slide, i) => {
         if (i === currentSlide) {
+          slide.classList.remove('prev-slide');
           slide.classList.add('active');
-        } else {
+        } else if (i === prevSlide) {
+          slide.classList.add('prev-slide');
           slide.classList.remove('active');
+        } else {
+          slide.classList.remove('active', 'prev-slide');
         }
       });
+
+      setTimeout(() => {
+        if (prevSlide >= 0 && superSlides[prevSlide] && prevSlide !== currentSlide) {
+          superSlides[prevSlide].classList.remove('prev-slide');
+        }
+      }, 850);
     }
 
     prevBtn.addEventListener('click', (e) => {

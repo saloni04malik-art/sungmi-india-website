@@ -1,11 +1,14 @@
 /**
  * Sungmi India — Insights & Knowledge (Blogs) Controller
- * Static interactive blog modal and card management
+ * Interactive blog modal and card management with dynamic DB data support
  */
 
-const BLOG_ARTICLES_DATA = [
+const BLOG_ARTICLES_DATA = (typeof window !== 'undefined' && Array.isArray(window.BLOG_ARTICLES_DATA))
+  ? window.BLOG_ARTICLES_DATA
+  : [
   {
     id: "marine-engineering",
+    slug: "marine-engineering",
     category: "MARINE ENGINEERING",
     title: "Why Marine Accommodation Systems Matter in Modern Shipbuilding",
     summary: "Marine accommodation is a critical structural subsystem directly influencing crew endurance, acoustic insulation, vessel balance, and statutory classification compliance.",
@@ -21,6 +24,7 @@ const BLOG_ARTICLES_DATA = [
   },
   {
     id: "marine-safety",
+    slug: "marine-safety",
     category: "MARINE SAFETY",
     title: "The Role of Fire-Resistant Doors in Marine Accommodation",
     summary: "In maritime safety engineering, fire-resistant doors act as vital thermal barriers designed to compartmentalize fire, prevent smoke migration, and preserve emergency evacuation corridors.",
@@ -36,6 +40,7 @@ const BLOG_ARTICLES_DATA = [
   },
   {
     id: "offshore-engineering",
+    slug: "offshore-engineering",
     category: "OFFSHORE ENGINEERING",
     title: "Building Accommodation Systems for Offshore Environments",
     summary: "Offshore oil rigs, FPSOs, platforms, and wind substations face extreme environmental loads, saline corrosion, high humidity, and continuous structural vibrations.",
@@ -51,6 +56,7 @@ const BLOG_ARTICLES_DATA = [
   },
   {
     id: "modular-systems",
+    slug: "modular-systems",
     category: "MODULAR SYSTEMS",
     title: "Modular Accommodation: Smarter Solutions for Marine Projects",
     summary: "Factory prefabrication of modular cabins and wet units streamlines shipyard schedules, reduces on-board hot work, and ensures consistent quality control under controlled industrial standards.",
@@ -93,31 +99,34 @@ function initBlogsSection() {
 
     if (modalBody) {
       modalBody.innerHTML = '';
-      blogData.paragraphs.forEach(pText => {
-        if (pText.startsWith('•')) {
-          const ul = document.createElement('ul');
-          ul.className = 'modal-blog-list';
-          const items = pText.split('\n');
-          items.forEach(item => {
-            const li = document.createElement('li');
-            const cleanText = item.replace(/^•\s*/, '');
-            // Bold leading term if format is "Title: Description"
-            if (cleanText.includes(':')) {
-              const parts = cleanText.split(':');
-              li.innerHTML = `<strong>${parts[0]}:</strong>${parts.slice(1).join(':')}`;
-            } else {
-              li.textContent = cleanText;
-            }
-            ul.appendChild(li);
-          });
-          modalBody.appendChild(ul);
-        } else {
-          const p = document.createElement('p');
-          p.className = 'modal-blog-paragraph';
-          p.textContent = pText;
-          modalBody.appendChild(p);
-        }
-      });
+      if (blogData.content) {
+        modalBody.innerHTML = blogData.content;
+      } else if (Array.isArray(blogData.paragraphs)) {
+        blogData.paragraphs.forEach(pText => {
+          if (pText.startsWith('•')) {
+            const ul = document.createElement('ul');
+            ul.className = 'modal-blog-list';
+            const items = pText.split('\n');
+            items.forEach(item => {
+              const li = document.createElement('li');
+              const cleanText = item.replace(/^•\s*/, '');
+              if (cleanText.includes(':')) {
+                const parts = cleanText.split(':');
+                li.innerHTML = `<strong>${parts[0]}:</strong>${parts.slice(1).join(':')}`;
+              } else {
+                li.textContent = cleanText;
+              }
+              ul.appendChild(li);
+            });
+            modalBody.appendChild(ul);
+          } else {
+            const p = document.createElement('p');
+            p.className = 'modal-blog-paragraph';
+            p.textContent = pText;
+            modalBody.appendChild(p);
+          }
+        });
+      }
     }
 
     modal.classList.add('active');
@@ -132,14 +141,24 @@ function initBlogsSection() {
     modal.setAttribute('aria-hidden', 'true');
   }
 
+  window.openBlogArticle = function (id) {
+    const dataset = (typeof window !== 'undefined' && Array.isArray(window.BLOG_ARTICLES_DATA) && window.BLOG_ARTICLES_DATA.length)
+      ? window.BLOG_ARTICLES_DATA
+      : BLOG_ARTICLES_DATA;
+
+    const blogData = dataset.find(b => String(b.id) === String(id) || (b.slug && String(b.slug) === String(id)));
+    if (blogData) {
+      openBlogModal(blogData);
+    }
+  };
+
+  window.closeBlogModal = closeBlogModal;
+
   readArticleBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const blogId = btn.getAttribute('data-blog-id');
-      const blogData = BLOG_ARTICLES_DATA.find(b => b.id === blogId);
-      if (blogData) {
-        openBlogModal(blogData);
-      }
+      window.openBlogArticle(blogId);
     });
   });
 
