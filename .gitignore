@@ -1,0 +1,14 @@
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Scratch / IDE
+scratch/
+.vscode/
+.idea/

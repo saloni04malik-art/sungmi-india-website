@@ -441,30 +441,22 @@ if ($adminEmail !== '') {
 
         $mail->isSMTP();
 
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
 
         $mail->SMTPAuth = true;
 
-        /*
-         * USE YOUR SAME WORKING
-         * SMTP DETAILS FROM
-         * enquiry_submit.php
-         */
+        $mail->Username = getenv('SMTP_USER') ?: '';
 
-        $mail->Username =
-            'saloni.infipre.intern@gmail.com';
-
-        $mail->Password =
-            'bkbl hebk fsoq pcki';
+        $mail->Password = getenv('SMTP_PASS') ?: '';
 
         $mail->SMTPSecure =
             PHPMailer::ENCRYPTION_STARTTLS;
 
-        $mail->Port = 587;
+        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
 
         $mail->setFrom(
-            'saloni.infipre.intern@gmail.com',
-            'Sungmi India Website'
+            getenv('SMTP_FROM_EMAIL') ?: (getenv('SMTP_USER') ?: 'info@sungmi.co.in'),
+            getenv('SMTP_FROM_NAME') ?: 'Sungmi India Website'
         );
 
         /*

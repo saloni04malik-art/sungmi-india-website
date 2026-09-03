@@ -1,13 +1,12 @@
 <?php
-
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['admin_id'])) {
-    header("Location: login.php");
+    $base_url = (strpos($_SERVER['REQUEST_URI'] ?? '', '/sungmi') !== false) ? '/sungmi' : '';
+    header("Location: " . $base_url . "/admin/login.php");
     exit;
 }
-/*This file simply checks:
 
-Is an admin logged in?
 
-If not → send them to login*/

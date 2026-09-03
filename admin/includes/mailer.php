@@ -3,30 +3,42 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require __DIR__ . '/../PHPMailer/src/Exception.php';
-require __DIR__ . '/../PHPMailer/src/PHPMailer.php';
-require __DIR__ . '/../PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/../../PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../../PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../../PHPMailer/src/SMTP.php';
 
 
 function sendSungmiEmail($recipient, $subject, $body, $attachment = null)
 {
+    $smtpHost      = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+    $smtpPort      = (int)(getenv('SMTP_PORT') ?: 587);
+    $smtpUser      = getenv('SMTP_USER') ?: '';
+    $smtpPass      = getenv('SMTP_PASS') ?: '';
+    $smtpFromEmail = getenv('SMTP_FROM_EMAIL') ?: ($smtpUser ?: 'info@sungmi.co.in');
+    $smtpFromName  = getenv('SMTP_FROM_NAME') ?: 'Sungmi India';
+
+    if (empty($smtpUser) || empty($smtpPass)) {
+        error_log('Sungmi Email Notice: SMTP_USER or SMTP_PASS environment variables are not set.');
+        return false;
+    }
+
     $mail = new PHPMailer(true);
 
     try {
 
         // SMTP
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'saloni.infipre.intern@gmail.com';
-        $mail->Password   = 'bkbl hebk fsoq pcki';
+        $mail->Username   = $smtpUser;
+        $mail->Password   = $smtpPass;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Port       = $smtpPort;
 
         // Sender
         $mail->setFrom(
-            'saloni.infipre.intern@gmail.com',
-            'Sungmi India'
+            $smtpFromEmail,
+            $smtpFromName
         );
 
         // Dynamic recipient
@@ -52,4 +64,4 @@ function sendSungmiEmail($recipient, $subject, $body, $attachment = null)
 
         return false;
     }
-}
+}
