@@ -121,7 +121,22 @@ include 'includes/headerScript.php';
                   <span class="contact-item-label">MOBILE</span>
                   <a href="tel:+919075006156" class="contact-link">+91 90750 06156</a>
                 </div>
-                
+              </div>
+
+              <!-- LinkedIn Item -->
+              <div class="contact-item-card">
+                <div class="contact-icon-bubble">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                </div>
+                <div class="contact-item-body">
+                  <span class="contact-item-label">LINKEDIN</span>
+                  <a href="https://www.linkedin.com/company/sungmi-india/?originalSubdomain=in" target="_blank"
+                    rel="noopener noreferrer" class="contact-link">LinkedIn /sungmi-india</a>
+                </div>
               </div>
 
             </div>

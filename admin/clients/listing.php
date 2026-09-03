@@ -16,7 +16,7 @@ $result = mysqli_query($conn, $sql);
 <div class="page-header">
 
 
- <a href="add.php" class="btn btn-sm btn-success">Add Product</a>
+ <a href="add.php" class="btn btn-sm btn-success">Add Client</a>
 </div>
 
 <div class="table-responsive">

@@ -188,6 +188,7 @@ function getRoleCardIcon($department, $title) {
 
         <!-- 3. CURRENT OPENINGS (CRISP WHITE CONTAINER AS IN TEMPLATE) -->
         <div class="careers-openings-section" id="careers-openings">
+          <span id="roles" style="position:relative; top:-90px; display:block; visibility:hidden;"></span>
           <div class="careers-center-header">
             <span class="careers-center-pretag">CURRENT OPENINGS</span>
             <h3 class="careers-center-headline">EXPLORE OPPORTUNITIES AT SUNGMI</h3>
