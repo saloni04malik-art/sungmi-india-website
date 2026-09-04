@@ -224,19 +224,7 @@ $enquiryId = mysqli_insert_id($conn);
 mysqli_stmt_close($stmt);
 
 
-/* Get current admin email */
-
-$adminResult = mysqli_query(
-    $conn,
-    "SELECT email
-     FROM admins
-     WHERE status = 1
-     LIMIT 1"
-);
-
-$adminRow = mysqli_fetch_assoc($adminResult);
-
-$adminEmail = $adminRow['email'] ?? '';
+$adminEmail = $smtpFromEmail;
 
 
 /* Send email */
@@ -250,19 +238,17 @@ if ($adminEmail !== '') {
     try {
 
         $mail->isSMTP();
-        $mail->Host = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        // echo $smtpHost, $smtpPort, $smtpUser, $smtpPass, $smtpFromEmail, $smtpFromName; exit;
+        $mail->Host = $smtpHost;
         $mail->SMTPAuth = true;
 
-        $mail->Username = getenv('SMTP_USER') ?: '';
-        $mail->Password = getenv('SMTP_PASS') ?: '';
+        $mail->Username = $smtpUser;
+        $mail->Password = $smtpPass;
 
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Port = $smtpPort;
 
-        $mail->setFrom(
-            getenv('SMTP_FROM_EMAIL') ?: (getenv('SMTP_USER') ?: 'info@sungmi.co.in'),
-            getenv('SMTP_FROM_NAME') ?: 'Sungmi India Website'
-        );
+        $mail->setFrom($smtpFromEmail, $smtpFromName);
 
         $mail->addAddress($adminEmail);
 

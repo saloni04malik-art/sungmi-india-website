@@ -409,24 +409,7 @@ mysqli_stmt_close($stmt);
    GET CURRENT ADMIN EMAIL
 ========================= */
 
-$adminEmail = '';
-
-$adminResult = mysqli_query(
-    $conn,
-    "SELECT email
-     FROM admins
-     WHERE status = 1
-     LIMIT 1"
-);
-
-if ($adminResult) {
-
-    $adminRow = mysqli_fetch_assoc($adminResult);
-
-    if ($adminRow) {
-        $adminEmail = $adminRow['email'];
-    }
-}
+$adminEmail = $smtpFromEmail;
 
 
 /* =========================
@@ -441,23 +424,20 @@ if ($adminEmail !== '') {
 
         $mail->isSMTP();
 
-        $mail->Host = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->Host = $smtpHost;
 
         $mail->SMTPAuth = true;
 
-        $mail->Username = getenv('SMTP_USER') ?: '';
+        $mail->Username = $smtpUser;
 
-        $mail->Password = getenv('SMTP_PASS') ?: '';
+        $mail->Password = $smtpPass;
 
         $mail->SMTPSecure =
             PHPMailer::ENCRYPTION_STARTTLS;
 
-        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Port = $smtpPort;
 
-        $mail->setFrom(
-            getenv('SMTP_FROM_EMAIL') ?: (getenv('SMTP_USER') ?: 'info@sungmi.co.in'),
-            getenv('SMTP_FROM_NAME') ?: 'Sungmi India Website'
-        );
+        $mail->setFrom($smtpFromEmail, $smtpFromName);
 
         /*
          * Current active admin receives email
